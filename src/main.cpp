@@ -4,6 +4,24 @@
 #include <EasySerialCom.h>
 #include <SoftwareSerial.h>
 
+// function declaration for the arduino build environment to create prototypes of these functions.
+// prototypes of the main functions (setup and loop) are already created by the arduino build environment.
+void onCommandReceived(Stream& serialStream, char* command, EasySerialCom::Error error);
+void writeToSerial(Stream& serialStream, char* msg);
+
+// in this case, this is optional since 'Serial' is already an object.
+HardwareSerial& mySerialUSB = Serial;
+
+// in this case, this is necessary since we are creating an actual object and not referencing an already created one.
+SoftwareSerial mySerialBLE(8, 9); // board RX & ble TX = 8, board TX & ble RX = 9
+
+// create 'EasySerialCom' objects for both serial devices
+EasySerialCom easySerialCom_USB(mySerialUSB, onCommandReceived, maxDataLength);
+EasySerialCom easySerialCom_BLE(mySerialBLE, onCommandReceived, maxDataLength);
+
+// a green led connected on pin number 2
+const byte ledGreen = 2;
+
 // max serial command length
 const byte maxDataLength = 64;
 
@@ -11,26 +29,13 @@ const byte maxDataLength = 64;
 // the further incoming data will be stored in the arduino buffer and not be read until set to true
 bool bListenForNewCommands = true;
 
-// function declaration for the arduino build environment to create prototypes of these functions.
-// The prototypes of the main functions are already created by the arduino build environment.
-void onCommandReceived(Stream& serialStream, char* command, EasySerialCom::Error error);
-//void onCommandReceived_serialUSB(char* command, EasySerialCom::Error error);
-//void onCommandReceived_serialBLE(char* command, EasySerialCom::Error error);
-void writeToSerial(Stream& serialStream, char* msg);
-
-// in this case, this is optional since 'Serial' is already an object. This is only for easier understanding.
-HardwareSerial& mySerialUSB = Serial;
-
-// in this case, this is necessary since we are creating an actual object and not using an already created one.
-SoftwareSerial mySerialBLE(8, 9); // board RX & ble TX = 8, board TX & ble RX = 9
-
-// create 'EasySerialCom' objects for both serial devices
-EasySerialCom easySerialCom_USB(mySerialUSB, onCommandReceived, maxDataLength);
-EasySerialCom easySerialCom_BLE(mySerialBLE, onCommandReceived, maxDataLength);
-
-const byte ledGreen = 2;
-
 void setup() {
+
+  // (OPTIONAL) set a different start and end tags for BLE (can be same too)
+  easySerialCom_BLE.setStartTag('{');
+  easySerialCom_BLE.setEndTag('}');
+  // - mySerialBLE will trigger onCommandReceived() function when received data is enclosed within ‘{’ and ‘}’ tags, as these have been changed.
+  // - mySerialUSB will trigger onCommandReceived() function when received data is enclosed within '<' and '>' tags, as these are the default tags.
 
   // set baud rate on all serial objects
   mySerialUSB.begin(9600);
@@ -38,15 +43,18 @@ void setup() {
 
   // set pin mode
   pinMode(ledGreen, OUTPUT);
+
 }
 
 void loop() {
+
   // IMPORTANT - call loop on all EasySerialCom objects, else it won't work
   // you can also omit the boolean check below if you don't mind receiving more commands before the current one has finished processing.
   if(bListenForNewCommands) {
     easySerialCom_USB.loop();
     easySerialCom_BLE.loop();
   }
+
 }
 
 void onCommandReceived(Stream& serialStream, char* command, EasySerialCom::Error error) {
@@ -98,9 +106,12 @@ void onCommandReceived(Stream& serialStream, char* command, EasySerialCom::Error
   writeToSerial(serialStream, responseChar);
 
   bListenForNewCommands = true;
+
 }
 
 void writeToSerial(Stream& t_serial, char* msg) {
+
   t_serial.write(msg);
   t_serial.write("\n");
+
 }
