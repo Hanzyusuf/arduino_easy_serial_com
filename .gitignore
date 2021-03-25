@@ -8,6 +8,7 @@
 *
 # except these files
 !.gitignore
+!README.md
 !EasySerialCom.h
 !EasySerialCom.cpp
 !main.cpp
