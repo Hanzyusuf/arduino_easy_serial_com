@@ -9,6 +9,9 @@
 void onCommandReceived(Stream& serialStream, char* command, EasySerialCom::Error error);
 void writeToSerial(Stream& serialStream, char* msg);
 
+// max serial command length
+const byte maxDataLength = 64;
+
 // in this case, this is optional since 'Serial' is already an object.
 HardwareSerial& mySerialUSB = Serial;
 
@@ -21,9 +24,6 @@ EasySerialCom easySerialCom_BLE(mySerialBLE, onCommandReceived, maxDataLength);
 
 // a green led connected on pin number 2
 const byte ledGreen = 2;
-
-// max serial command length
-const byte maxDataLength = 64;
 
 // set to false when the current command has not been parsed and processed
 // the further incoming data will be stored in the arduino buffer and not be read until set to true
