@@ -74,6 +74,7 @@ A working example is provided in [main.cpp](https://github.com/Hanzyusuf/arduino
 #### Additional Notes:
 - Default start and end tags are *'<' and '>'* respectively.
 - Do not use the characters in between data which have been set as the start and end tags for that EasySerialCom object! If needed, [change the start and end tags](https://github.com/Hanzyusuf/arduino_easy_serial_com/blob/3be32be43df4a3c1134d2ce2ae9de4fd7b710593/src/main.cpp#L34-L38) accordingly.
+- The **command** param in **onCommandReceived** function will not include the start and end tags.
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
